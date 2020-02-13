@@ -1,0 +1,109 @@
+# Used to send an email to all users currently registered on the system
+# Developed to let all users that we are moving off llaw3301.achelp.net
+# and to give them the option to request a new account on
+# docassemble.flinders.edu.au
+---
+objects:
+  - the_sender: Individual
+  - email_from: Individual
+---
+# Displays an initial confirmation screen.
+mandatory: True
+question: User Notifier
+subquestion: |
+  This app will send an email to the list of users below:
+
+  % for item in user_list:
+  - ${ item }
+  % endfor
+
+  Are you sure you want to continue?
+buttons:
+  - Continue: continue
+  - Exit: exit
+    url: https://llaw3301.achelp.net
+---
+mandatory: True
+question: Emails sent
+subquestion: |
+  Emails sent to the following individuals
+  
+  Name|Email|Status
+  ---|---|---
+  % for a_result in result_list:
+  ${ a_result['user'] } | ${ a_result['user'].email } | ${ str(a_result['status']) }
+  % endfor
+  
+buttons:
+  - Exit: exit
+    url: https://llaw3301.achelp.net
+  - Restart: restart
+---
+# Constructs the list of users to which emails will be sent
+code: |
+  user_list = []
+  for item in get_user_list():
+    temp = Individual()
+    temp.email = item['email']
+    if item['first_name']:
+      temp.name.first = item['first_name']
+      temp.name.last = item['last_name']
+    else:
+      temp.name.first = 'Sir or Madam'
+      temp.name.last = '(' + item['email'] + ')'
+    # Send the email
+    first_name = temp.name.first
+    last_name = temp.name.last
+    user_list.append(temp)
+---
+# Sends email to each user and records result
+code: |
+  result_list = []
+  for user in user_list:
+    first_name = user.name.first
+    last_name = user.name.last
+    did_send = send_email(to=user, template=email_message)
+    result_list.append({'user': user,'status': did_send})
+---
+code: |
+  the_sender.name.first = 'Mark'
+  the_sender.name.last = 'Ferraretto'
+  the_sender.email = 'mark.ferraretto@flinders.edu.au'
+---
+template: email_message
+subject: |
+  Docassemble server decommissioning
+content: |
+  Dear ${ first_name } ${ last_name },
+  
+  The Docassemble server [https://llaw3301.achelp.net](https://llaw3301.achelp.net)
+  ('**Old Server**') 
+  will be decommissioned on **March 2 2020**.  In its place we are commissioning
+  a new Docassemble server 
+  [https://docassemble.flinders.edu.au](https://docassemble.flinders.edu.au)
+  ('**New Server**').
+  The Old Server was run on my personal AWS account whereas the New Server 
+  is managed by the University.  The new server also has much more capacity.
+
+  You are being notified of this because you currently have an account on 
+  the Old Server.  On March 2, the server will be shut down 
+  and any content on the server will be destroyed.  It is up to you to make 
+  any copies of code you would like to keep from this server.  Please note 
+  that you may do so by creating a package containing your code and pushing 
+  it up to GitHub.
+
+  If you would like an account on the New Server please 
+  let me know by sending an email to 
+  [Mark Ferraretto](mailto:mark.ferraretto@flinders.edu.au).
+  
+  DO NOT REPLY TO THIS EMAIL
+  as your reply will be lost.
+  
+  If you do not want
+  an account on the new server you do not need to do anything.
+
+  All the best
+
+  Mark
+---
+  

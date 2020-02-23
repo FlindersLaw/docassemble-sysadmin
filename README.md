@@ -1,6 +1,6 @@
 # docassemble.sysadmin
 
-A docassemble extension.
+Code for administering Docassemble - written for management of *LLAW3301 Law in a Digital Age*
 
 ## Author
 

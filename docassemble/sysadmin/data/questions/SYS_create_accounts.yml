@@ -1,0 +1,155 @@
+# Creates accounts for students studying LLAW3301 Law in a Digital Age
+# - Processes CSV export from FLO that contains all active students.  
+# - Creates user accounts using emails constructed as FAN@flinders.edu.au.
+# - user accounts created with random passwords
+# - Populates name details into DA account
+# - emails each user and attaches PDF containing username, password and 
+#   access instructions.
+---
+# Use this to create password.
+imports:
+  - os
+  - random
+  - string
+---
+objects:
+  - the_sender: Individual
+  - email_from: Individual
+  - accounts_import: DAList.using(auto_gather=False, gathered=True)
+  - accounts_created: DAList.using(auto_gather=False, gathered=True)
+---
+# Need these python modules
+include:
+  - SYS_create_accounts_questions.yml
+---
+# Displays an initial confirmation screen.
+mandatory: True
+question: User Account creator
+subquestion: |
+  This app creates accounts on this Docassemble system.  It is designed to
+  read input from user data exported from FLO.  To export the data do the 
+  following:
+  
+  - instructions to go here
+  
+  You must have this data ready to upload before you run this application.  After
+  you upload the file there will be no further interaction with this program.  
+  Everything will happen automagically.
+  
+  For your information, a template PDF is displayed below.  If you are not
+  satisfied with the PDF **do not run this program**.  You will need to edit
+  the Word file in the `docassemble-sysadmin` package, re-upload your new Word
+  file and then re-run the program.
+  
+  Once you have the data ready click on Continue to create accounts.
+buttons:
+  - Continue: continue
+  - Exit: exit
+    url: https://docassemble.flinders.edu.au
+---
+# Reads the input file and calls csv to create a list of lists.
+# I wanted to use the csv python module but I received pickle errors so 
+# I dropped it and processed my CSV manually
+mandatory: True
+code: |
+  # Read the data into a CSV object
+  all_the_lines = csv_import.slurp()
+  for line in all_the_lines.splitlines():
+    elements = line.replace('"', '').split(',', maxsplit=4)
+    if elements[0] == 'FAN':
+      continue
+ 
+    # Otherwise, we process.
+    one_item = {}
+    one_item['FAN'], one_item['first_name'], one_item['last_name'], one_item['email'], the_rest = elements
+    accounts_import.append(one_item)
+---
+mandatory: True
+question: Accounts to be created
+subquestion: |
+  The following accounts will be created.  Press 'Continue' to create accounts
+  
+  ${accounts_table}
+buttons:
+  - Continue: continue
+  - Restart: restart
+  - Exit: exit
+---
+# Constructs the list of users to which emails will be sent
+mandatory: True
+code: |
+  # Initial randomness for the password
+  chars = string.ascii_letters + string.digits + '!@#$%^&*()'
+  random.seed = (os.urandom(1024))
+  
+  for row in accounts_import:
+    # test data
+    MJFemail = 'ferr0182@flinders.edu.au'
+  
+    # Construct additional information
+    additional_information = {
+      'first_name': row['first_name'],
+      'last_name': row['last_name'],
+      'timezone': 'Australia/Adelaide'
+    }
+    
+    # We always create developers
+    MJFprivileges = 'developer'
+    
+    # This does the creation.  Only if the user doesn't exist
+    if not get_user_info(email=MJFemail):
+      skip_create = False
+      try:
+        # Make a 13 character password
+        MJFpassword = ''.join(random.choice(chars) for i in range(13))
+        create_statusa = create_user(MJFemail, MJFpassword, privileges=MJFprivileges, info=additional_information)
+        create_exception = False
+        create_status = create_statusa
+      except Exception as e:
+        create_exception = True
+        create_status = str(e)
+        MJFpassword = ''
+      make_account = True
+    else:
+      # User already exists
+      skip_create = True
+      create_status = 'Account already exists'
+      MJFpassword = ''
+    
+    # For some reason I get a 400 error even if the account is created
+    # So I need to check for success myself.
+    if get_user_info(email=MJFemail):
+      create_status = 'Account created'
+      # If we're here then we're good to send an email
+      MJFrecipient = Individual()
+      MJFrecipient.name.first = row['first_name']
+      MJFrecipient.name.last  = row['last_name']
+      MJFrecipient.email = MJFemail
+      did_send = send_email(to=MJFrecipient, template=MJFemail_message)
+    elif get_user_info(email=MJFemail) and skip_create:
+      did_send = 'N/A - account exists'
+    else:
+     did_send = 'N/A - account not created'
+
+    # Record the status
+    accounts_created.append( {
+      'FAN'       : row['FAN'],
+      'first_name': row['first_name'],
+      'last_name' : row['last_name'],
+      'password'  : MJFpassword,
+      'status'    : create_status,
+      'did_send'  : did_send
+    })
+---
+mandatory: True
+question: Accounts Creation Status
+subquestion: |
+  The `status` column should display the user's email address if the account
+  was created successfully
+  
+  ${accounts_created_table}
+buttons:
+  - Continue: continue
+  - Restart: restart
+  - Exit: exit
+---

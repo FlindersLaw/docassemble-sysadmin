@@ -22,6 +22,21 @@ objects:
 include:
   - SYS_create_accounts_questions.yml
 ---
+# Code blocks to set up password
+mandatory: True
+code: |
+  # Initialise randomness
+  random.seed = (os.urandom(1024))
+---
+# Length of the password
+code: |
+  # Length of the password
+  MJFpwlength = 13
+---
+# Characters from which to make password
+code: |
+  MJFpwchars = string.ascii_letters + string.digits + '!@#$%^&*()'
+---
 # Displays an initial confirmation screen.
 mandatory: True
 question: User Account creator
@@ -49,7 +64,10 @@ buttons:
 ---
 # Reads the input file and calls csv to create a list of lists.
 # I wanted to use the csv python module but I received pickle errors so 
-# I dropped it and processed my CSV manually
+# I dropped it and processed my CSV manually.
+# UPDATE: also populates 'tried' key with False.  This key is used to
+# establish whether we've attempted to create this user already or not and
+# needs to be initialised.
 mandatory: True
 code: |
   # Read the data into a CSV object
@@ -63,6 +81,20 @@ code: |
     one_item = {}
     one_item['FAN'], one_item['first_name'], one_item['last_name'], one_item['email'], the_rest = elements
     accounts_import.append(one_item)
+---
+# Populate additional fields required for user account creation.  These are
+# - password
+# - access credentials ('privileges')
+# - 'tried' flag
+# 'tried' needs to be set to False.  It is set to true when an attempt to 
+# create the account is performed.  
+mandatory: True
+code: |
+  for element in accounts_import:
+    element['password'] = ''.join(random.choice(MJFpwchars) for i in range(MJFpwlength))
+    element['tried'] = False
+    element['privileges'] = 'developer'
+    element['email_status'] = False
 ---
 mandatory: True
 question: Accounts to be created
@@ -78,68 +110,51 @@ buttons:
 # Constructs the list of users to which emails will be sent
 mandatory: True
 code: |
-  # Initial randomness for the password
-  chars = string.ascii_letters + string.digits + '!@#$%^&*()'
-  random.seed = (os.urandom(1024))
-  
   for row in accounts_import:
-    # test data
-    MJFemail = 'ferr0182@flinders.edu.au'
-  
-    # Construct additional information
-    additional_information = {
-      'first_name': row['first_name'],
-      'last_name': row['last_name'],
-      'timezone': 'Australia/Adelaide'
-    }
-    
-    # We always create developers
-    MJFprivileges = 'developer'
-    
-    # This does the creation.  Only if the user doesn't exist
-    if not get_user_info(email=MJFemail):
-      skip_create = False
+    if not row['tried']:
+      # Construct additional information
+      additional_information = {
+        'first_name': row['first_name'],
+        'last_name': row['last_name'],
+        'timezone': 'Australia/Adelaide'
+      }
       try:
-        # Make a 13 character password
-        MJFpassword = ''.join(random.choice(chars) for i in range(13))
-        create_statusa = create_user(MJFemail, MJFpassword, privileges=MJFprivileges, info=additional_information)
-        create_exception = False
-        create_status = create_statusa
+        # Set the tried flag first.  If we get this far it means we've
+        # made an attempt
+        row['tried'] = True
+        # and now do the dirty
+        create_user(
+          row['email'], row['password'],
+          privileges=row['privileges'],
+          info=additional_information)
+        row['status'] = 'OK'
       except Exception as e:
-        create_exception = True
-        create_status = str(e)
-        MJFpassword = ''
-      make_account = True
-    else:
-      # User already exists
-      skip_create = True
-      create_status = 'Account already exists'
-      MJFpassword = ''
+        row['status'] = str(e)
+---
+# Send emails to users
+mandatory: True
+code: |
+  for row in accounts_import:
+    # Unsucccessful attempts are not sent emails
+    if not row['tried']:
+      continue
     
-    # For some reason I get a 400 error even if the account is created
-    # So I need to check for success myself.
-    if get_user_info(email=MJFemail):
-      create_status = 'Account created'
-      # If we're here then we're good to send an email
-      MJFrecipient = Individual()
-      MJFrecipient.name.first = row['first_name']
-      MJFrecipient.name.last  = row['last_name']
-      MJFrecipient.email = MJFemail
-      did_send = send_email(to=MJFrecipient, template=MJFemail_message)
-    elif get_user_info(email=MJFemail) and skip_create:
-      did_send = 'N/A - account exists'
-    else:
-     did_send = 'N/A - account not created'
-
-    # Record the status
-    accounts_created.append( {
-      'FAN'       : row['FAN'],
-      'first_name': row['first_name'],
-      'last_name' : row['last_name'],
-      'password'  : MJFpassword,
-      'status'    : create_status,
-      'did_send'  : did_send
-    })
+    # TODO: what if status is not an ID?  That would imply that
+    # the account most likely exists already.
+    if row['status'] != 'OK':
+      continue
+      
+    # Now get down and dirty
+    # Need to construct an Individual object to pass to send_email()
+    MJFrecipient = Individual()
+    MJFrecipient.name.first = row['first_name']
+    MJFrecipient.name.last = row['last_name']
+    MJFrecipient.email = row['email']
+    MJFrecipient.password = row['password']
+    row['email_status'] = send_email(
+                            to=MJFrecipient, 
+                            template=MJFemail_message,
+                            attachments=[MJFattachment])
 ---
 mandatory: True
 question: Accounts Creation Status
@@ -149,7 +164,6 @@ subquestion: |
   
   ${accounts_created_table}
 buttons:
-  - Continue: continue
   - Restart: restart
   - Exit: exit
 ---

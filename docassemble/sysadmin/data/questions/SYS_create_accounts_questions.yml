@@ -1,7 +1,3 @@
-imports:
-  - os
-  - random
-  - string
 ---
 # Table to display.  We construct it by uploading the file and importing
 # data into it.
@@ -16,10 +12,14 @@ columns:
       row_item['last_name']
   - Email:
       row_item['email']
+  - Password:
+      row_item['password']
+  - Privileges:
+      row_item['privileges']
 ---
 # Table to display account creation status
 table: accounts_created_table
-rows: accounts_created
+rows: accounts_import
 columns:
   - FAN: |
       row_item['FAN']
@@ -31,8 +31,8 @@ columns:
       row_item['password']
   - Account creation status:
       row_item['status']
-  - Email send status:
-      row_item['did_send']
+  - Email sent status:
+      row_item['email_status']
 ---
 question: Select input file
 subquestion: |
@@ -53,58 +53,44 @@ content: |
   
   Welcome to LLAW3301 Law in a Digital Age.
   
-  This email contains instructions on how to access 
+  As you know, you will be learning coding skills as part of this topic.
+  In order to do this you need access to 
   [Docassemble](https://docassemble.org), which we will use to write our code,
   and [GitHub](https://github.com), which we will use to share code in our teams.
 
-  ### Docassemble
-  The table below contains the link to the Docassemble system and your
-  access credentials.  You should change your password once you log in.  Refer
-  to [this document](https://flo.flinders.edu.au/mod/resource/view.php?id=2674336)
-  for instructions.
-  
-  Docassemble server|https://docassemble.flinders.edu.au
-  ---|---
-  Login ID          |${ MJFrecipient.email }
-  Password          |`${ MJFpassword }`
-  
-  ### GitHub
-  
-  You also need to sign up for a GitHub student account.  Please refer to
-  [this document](https://flo.flinders.edu.au/mod/resource/view.php?id=2674336)
-  for instructions.
+  The attached document contains your credentials to log into the
+  [Flinders Docassemble Server](https://docassemble.flinders.edu.au) and
+  instructions for creating a GitHub account and connecting it to your
+  Docassemble account.
   
   In order to access Docassemble and GitHub, you will need a computer with
   a modern web
-  browser, such as the latest versions of Chrome, Firefox, Safari or Edge.
+  browser, such as Chrome, Firefox, Safari or Edge.
   Internet Explorer should not be used to access Docassemble (in fact, Internet
   Explorer should not be used for anything!).
+  
+  Make sure your web browser is up to date and has the latest updates installed.
+  If you don't know what this means, please come and see me.
 
   As you will find out during the course, if you have any issues, it is up to you 
   to contact the Topic Co-ordinator.  So, if you have any problems accessing either
   Docassemble or GitHub, please come and see me **as soon as possible**.  It's
   best to sort these problems out sooner rather than later.
-
-  My contact details are in the Topic Guide.  My email address is
-  [Mark Ferraretto](mailto:mark.ferraretto@flinders.edu.au).
-  
+ 
   **DO NOT REPLY TO THIS EMAIL**
-  as your reply will be lost.
+  as your reply will be lost.  Instead, look for my contact details in the
+  [Topic Guide](https://flo.flinders.edu.au/mod/resource/view.php?id=2668148).
   
-  All the best
+  Wishing you all the best for this topic.  It's new, it's exciting and it's
+  not as scary as you may think!
 
-  Mark
+  Mark Ferraretto  
+  [mark.ferraretto@flinders.edu.au](mailto:mark.ferraretto@flinders.edu.au)
 ---
-template: email_message2
-subject: |
-  Access credentials for LLAW3301 Law in a Digital Age
-content: |
-  Dear ${ first_name } ${ last_name },
-    
-  Docassemble Server|[https://docassemble.flinders.edu.au](https://docassemble.flinders.edu.au)
-  ---|---
-  Your login email address | `${users_email}`
-  Your login password      | `${users_password}`
-  
-
+attachment:
+  - docx template file: Access_to_Docassemble_and_GitHub.docx
+    variable name: MJFattachment
+    filename: Access to Docassemble and GitHub
+    valid formats:
+      - docx
 ---

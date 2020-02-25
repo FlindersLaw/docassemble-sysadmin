@@ -1,0 +1,41 @@
+---
+objects:
+  - resultsTable: DAList.using(auto_gather=False, gathered=True)
+---
+variable name: users_list
+use objects: True
+data:
+  - name: Name 1
+    tried: False
+  - name: Name 2
+    tried: False
+  - name: Name 3
+    tried: False
+---
+mandatory: True
+question: Data 1
+subquestion: |
+  ${ users_table }
+buttons:
+  - Continue: continue
+---
+mandatory: True
+code: |
+  for row in users_list:
+    row['tried'] = True
+---
+mandatory: True
+question: Data 2
+subquestion: |
+  ${ users_table }
+buttons:
+  - Continue: continue
+---
+table: users_table
+rows: users_list
+columns:
+  - Name: |
+      row_item['name']
+  - Tried: |
+      row_item['tried']
+---

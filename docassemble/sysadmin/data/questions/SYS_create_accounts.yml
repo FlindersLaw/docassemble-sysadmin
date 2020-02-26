@@ -1,3 +1,8 @@
+###
+### IMPORTANT
+### Code related to multiple privileges is not tested.  Proceed with caution!!
+
+
 # Creates accounts for students studying LLAW3301 Law in a Digital Age
 # - Processes CSV export from FLO that contains all active students.  
 # - Creates user accounts using emails constructed as FAN@flinders.edu.au.
@@ -21,6 +26,12 @@ objects:
 # Need these python modules
 include:
   - SYS_create_accounts_questions.yml
+---
+# Change this to reflect the current course 'privilege' defined in
+# Docassemble
+mandatory: True
+code: |
+  MJFtopic_priv = 'llaw3301_2020_s1'
 ---
 # Code blocks to set up password
 mandatory: True
@@ -80,6 +91,13 @@ code: |
     # Otherwise, we process.
     one_item = {}
     one_item['FAN'], one_item['first_name'], one_item['last_name'], one_item['email'], the_rest = elements
+    # Find which seminar they are in
+    # We assume the CSV always lists seminars as 'Seminar nn'
+    for group in the_rest.split(','):
+      if group.lower()[:7] == 'seminar':
+        MJFseminar = 'seminar_' + group.lower()[8:]
+        break
+    one_item['seminar'] = MJFseminar
     accounts_import.append(one_item)
 ---
 # Populate additional fields required for user account creation.  These are
@@ -90,10 +108,14 @@ code: |
 # create the account is performed.  
 mandatory: True
 code: |
+  # Get the privilege before we start
+  the_priv = MJFtopic_priv
+  
+  # And away we go!
   for element in accounts_import:
     element['password'] = ''.join(random.choice(MJFpwchars) for i in range(MJFpwlength))
     element['tried'] = False
-    element['privileges'] = 'developer'
+    element['privileges'] = ['developer', the_priv, element['seminar'] ]
     element['email_status'] = False
 ---
 mandatory: True

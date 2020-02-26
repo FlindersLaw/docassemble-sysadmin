@@ -1,0 +1,123 @@
+# Adds additional privileges to accounts already created.  We do this because
+# We forgot to do this when we created the accounts yesterday.
+###
+### IMPORTANT
+### Code related to multiple privileges is not tested.  Proceed with caution!!
+
+
+# Creates accounts for students studying LLAW3301 Law in a Digital Age
+# - Processes CSV export from FLO that contains all active students.  
+# - Creates user accounts using emails constructed as FAN@flinders.edu.au.
+# - user accounts created with random passwords
+# - Populates name details into DA account
+# - emails each user and attaches PDF containing username, password and 
+#   access instructions.
+---
+objects:
+  - accounts_import: DAList.using(
+                          auto_gather=False,
+                          gathered=True)
+---
+# Need these python modules
+include:
+  - SYS_add_privileges_questions.yml
+---
+# Change this to reflect the current course 'privilege' defined in
+# Docassemble
+mandatory: True
+code: |
+  MJFtopic_priv = 'llaw3301_2020_s1'
+---
+# Reads the input file and calls csv to create a list of lists.
+# I wanted to use the csv python module but I received pickle errors so 
+# I dropped it and processed my CSV manually.
+# UPDATE: also populates 'tried' key with False.  This key is used to
+# establish whether we've attempted to create this user already or not and
+# needs to be initialised.
+mandatory: True
+code: |
+  # Read the data into a CSV object
+  all_the_lines = csv_import.slurp()
+  for line in all_the_lines.splitlines():
+    elements = line.replace('"', '').split(',', maxsplit=4)
+    if elements[0] == 'FAN':
+      continue
+ 
+    # Otherwise, we process.
+    one_item = {}
+    one_item['FAN'], one_item['first_name'], one_item['last_name'], one_item['email'], the_rest = elements
+    # Find which seminar they are in
+    # We assume the CSV always lists seminars as 'Seminar nn'
+    # We assume users are only ever in one seminar
+    for group in the_rest.split(','):
+      if group.lower()[:7] == 'seminar':
+        one_item['seminar'] = 'seminar_' + group.lower()[8:]
+        break
+    try:
+      one_item['display_seminar'] = one_item['seminar']
+    except:
+      one_item['display_seminar'] = 'No seminars listed'
+      
+    accounts_import.append(one_item)
+---
+mandatory: True
+question: Seminar privileges to be added
+subquestion: |
+  Users will be granted these seminar privileges.  All users will be granted
+  the `${ MJFtopic_priv }` privilege.  
+  
+  ${accounts_table}
+buttons:
+  - Continue: continue
+  - Restart: restart
+  - Exit: exit
+---
+# Add privileges
+mandatory: True
+code: |
+  # Get the topic privilege early - for idempotency
+  topic_priv = MJFtopic_priv
+  
+  for row in accounts_import:
+    # Get the user's id
+    user_info = get_user_info(email=row['email'])
+    _user_id = user_info['id']
+    
+    # Construct a list of privileges to add
+    priv_list = []
+    priv_list.append(topic_priv)
+    
+    # Add existing privileges
+    for a_priv in user_info['privileges']:
+      priv_list.append(a_priv)
+    
+    # Append a seminar if we have one.
+    try:
+      priv_list.append(row['seminar'])
+    except:
+      pass
+    
+    # Add the privileges.
+    try:
+      set_user_info(user_id=_user_id, privileges=priv_list)
+      row['status'] = 'OK'
+    except Exception as e:
+      row['status'] = str(e)
+    
+    # Populate the new privs for this user, so we can display them.
+    user_info = get_user_info(user_id=_user_id)
+    try:
+      row['privileges'] = user_info['privileges']
+    except Exception as e:
+      row['privileges'] = str(e)
+---
+mandatory: True
+question: Add Privilege Status
+subquestion: |
+  Privileges added to users.  Check table below for status.
+  
+  ${accounts_created_table}
+buttons:
+  - Restart: restart
+  - Exit: exit
+---

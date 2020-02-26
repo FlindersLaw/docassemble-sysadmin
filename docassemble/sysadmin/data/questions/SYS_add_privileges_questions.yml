@@ -1,0 +1,51 @@
+---
+# Table to display.  We construct it by uploading the file and importing
+# data into it.
+table: accounts_table
+rows: accounts_import
+columns:
+  - FAN: |
+      row_item['FAN']
+  - First Name: |
+      row_item['first_name']
+  - Last Name: |
+      row_item['last_name']
+  - Email: |
+      row_item['email']
+  - Seminar: |
+      row_item['display_seminar']
+---
+# Table to display account creation status
+table: accounts_created_table
+rows: accounts_import
+columns:
+  - FAN: |
+      row_item['FAN']
+  - First Name: |
+      row_item['first_name']
+  - Last Name: |
+      row_item['last_name']
+  - Privileges: |
+      row_item['privileges']
+  - Privilege add status:
+      row_item['status']
+---
+question: Update User Privileges
+subquestion: |
+  This script reads all existing users and adds these additional privileges:
+  
+  - `llaw3301_2020_s1` (which is hard-wired into the code); and
+  - their seminar number.
+  
+  The seminar number is extracted from a CSV export from FLO.  The topic identifier
+  is hard-coded.  You need to change it in the main program.
+  
+  This code was written as a one-off as I forgot to add these extra privileges when
+  I did the user account creation yesterday (25/2/20).
+  
+  Upload a CSV export of enrolled user data from FLO.
+  
+fields:
+  - no label: csv_import
+    datatype: file
+---

@@ -15,7 +15,7 @@ columns:
   - Password:
       row_item['password']
   - Privileges:
-      row_item['privileges']
+      '[Link](' + row_item['privileges'] + ')'
 ---
 # Table to display account creation status
 table: accounts_created_table

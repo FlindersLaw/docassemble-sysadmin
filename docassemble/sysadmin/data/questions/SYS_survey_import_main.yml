@@ -1,0 +1,53 @@
+# Imports projects for the semester into a DAStore that can
+# be accessed from other interview.  Import file should be a CSV with
+# these fields:
+# - Project Identifier
+# - Organisation
+# - Description
+# - URL (to Problem STatement in FLO)
+#
+# Example:
+#
+# Project Identifier,Organisation,Description,URL
+# P01. UnitingSA,UnitingSA,NDB Assessor,https://flo.flinders.edu.au/mod/resource/view.php?id=2679033
+# P02. FPSA,Family Planning Network SA,Service Directory,https://flo.flinders.edu.au/mod/resource/view.php?id=2679040
+---
+include:
+  - SYS_csv_importer.yml
+  - SYS_survey_import_questions.yml
+---
+objects:
+  - llaw3301_data: DAStore.using(base='global')
+  - MJFconstants: DAObject
+---
+# Define 'constants' here
+mandatory: True
+code: |
+  MJFconstants.teaching_period = '2020_S1'
+  MJFconstants.project_data = MJFconstants.teaching_period + '_project_data'
+  MJFconstants.student_data = MJFconstants.teaching_period + '_student_data'
+---
+# Get the current projects
+code: |
+  current_projects_data = llaw3301_data.get(MJFconstants.project_data)
+---
+# Import the CSV data
+mandatory: True
+code: |
+  import_csv
+---
+# Test of DAStore
+mandatory: True
+code: |
+  llaw3301_data.set(MJFconstants.project_data, csv_data)
+  undefine('current_projects_data')
+---
+# Display the data
+mandatory: True
+question: Test import
+subquestion: |
+  ${ current_projects_table }
+buttons:
+  - Exit: exit
+  - Restart: restart
+---

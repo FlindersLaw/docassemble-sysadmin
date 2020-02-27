@@ -1,0 +1,27 @@
+---
+# Must be defined.  Is displayed on the CSV importer
+template: MJFimport_message
+content: |
+  ### LLAW3301 Projects Import
+  
+  If you proceed, the current projects data will be overwritten.  Current data
+  is in the table below.
+  
+  %if current_projects_data:
+  ${ current_projects_table }
+  %else:
+  **No records in table**
+  %endif
+---
+table: current_projects_table
+rows: current_projects_data
+columns:
+  - Project ID: |
+      row_item['Project Identifier']
+  - Organisation: |
+      row_item['Organisation']
+  - Description: |
+      row_item['Description']
+  - URL: |
+      '[Link](' + row_item['URL'] + ')'
+---

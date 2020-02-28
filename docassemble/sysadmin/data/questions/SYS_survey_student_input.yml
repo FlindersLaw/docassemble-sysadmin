@@ -103,8 +103,10 @@ subquestion: |
 
 buttons:
   - Exit: exit
-    url: https://flinders.docassemble.edu.au
+    url: https://docassemble.flinders.edu.au
   - Restart: restart
+  - Log out: leave
+    url: https://docassemble.flinders.edu.au
 ---
 event: require_login_screen
 question: |

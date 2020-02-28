@@ -13,41 +13,114 @@
 # P02. FPSA,Family Planning Network SA,Service Directory,https://flo.flinders.edu.au/mod/resource/view.php?id=2679040
 ---
 include:
+  - SYS_survey_constants.yml
   - SYS_csv_importer.yml
   - SYS_survey_import_questions.yml
 ---
-objects:
-  - llaw3301_data: DAStore.using(base='global')
-  - MJFconstants: DAObject
+# Are we importing projects or student data
+mandatory: True
+question: Select Data Import
+subquestion: |
+  Specify whether you are importing:
+
+  - Project data; or
+  - Student data
+buttons:
+  - Project Data:
+      code: |
+        data_import = MJFconstants.data_type_project
+  - Student Data:
+      code: |
+        data_import = MJFconstants.data_type_student
+  - Exit: exit
 ---
-# Define 'constants' here
+# Set the logic to run depending on our selection
 mandatory: True
 code: |
-  MJFconstants.teaching_period = '2020_S1'
-  MJFconstants.project_data = MJFconstants.teaching_period + '_project_data'
-  MJFconstants.student_data = MJFconstants.teaching_period + '_student_data'
+  # The data to get
+  if data_import == MJFconstants.data_type_project:
+    data_key = MJFconstants.project_data
+    MJFimport_message = MJFprojects_message
+  else:
+    # We assume only two choices
+    data_key = MJFconstants.student_data
+    MJFimport_message = MJFstudents_message
 ---
-# Get the current projects
-code: |
-  current_projects_data = llaw3301_data.get(MJFconstants.project_data)
----
-# Import the CSV data
+# Import the CSV data.  This variable kicks off the questions
+# to prompt for the data file and import into a variable called
+# 'csv_data'
 mandatory: True
 code: |
   import_csv
 ---
-# Test of DAStore
+# Upload the data to the DAstore and...
 mandatory: True
 code: |
-  llaw3301_data.set(MJFconstants.project_data, csv_data)
-  undefine('current_projects_data')
+  # Student data needs to be processed first
+  if data_import == MJFconstants.data_type_student:
+    # This variable is set at the end of the processing of
+    # student data
+    student_data_processed
+    # Upload into DAstore
+    llaw3301_data.set(data_key, current_students_data)
+    # reset the variable so the table is generated from the DAstore data
+    undefine('current_students_data')
+  else:
+    llaw3301_data.set(data_key, csv_data)
+    undefine('current_projects_data')
 ---
-# Display the data
+# ...display a final screen
 mandatory: True
-question: Test import
+question: Data Import complete
 subquestion: |
+  Data has been imported into `DAStore`.  The table below shows the 
+  current state of the database.
+
+  % if data_import == MJFconstants.data_type_project:
   ${ current_projects_table }
+  % else:
+  ${ student_data_table }
+  % endif
 buttons:
   - Exit: exit
   - Restart: restart
+---
+
+# Process the student data.  The data imported from the FLO CSV is not
+# exactly what we want.  We want to strip out the superfluous groups and
+# have just a single 'seminar' entry
+# Note: we don't have an analagous code block for project data as we don't
+#       need to process it before we import it.
+# Note: this must sit above the DAStore get blocks so that when DA comes
+#       looking to define current_students_data it doesn't pick up this
+#       code block.
+code: |
+  current_students_data = []
+  for _entry in csv_data:
+    an_item = {}
+    an_item['FAN'] = _entry['FAN']
+    an_item['first_name'] = _entry['First name']
+    an_item['last_name'] = _entry['Surname']
+    an_item['email'] = _entry['Email address']
+
+    # Find the seminar
+    an_item['seminar'] = 'No Seminar'
+    for _key in _entry:
+      if _key[:5] == 'Group' and _entry[_key][:7] == 'Seminar':
+        an_item['seminar'] = _entry[_key]
+        break
+    
+    # Add our record to current_students_data
+    current_students_data.append(an_item)
+  
+  # Set this to trigger DA to process this code block
+  student_data_processed = True
+---
+# Get the current projects
+code: |
+  current_projects_data = llaw3301_data.get(data_key)
+---
+# Get the current student data
+code: |
+  current_students_data = llaw3301_data.get(data_key)
 ---

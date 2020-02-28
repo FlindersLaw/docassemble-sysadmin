@@ -1,0 +1,16 @@
+# Erases a data store
+# Objects and constants copied from survey_import_main.
+---
+objects:
+  - llaw3301_data: DAStore.using(base='global')
+  - MJFconstants: DAObject
+---
+# Define 'constants' here
+mandatory: True
+code: |
+  MJFconstants.teaching_period = '2020_S1'
+  MJFconstants.data_type_student = 'student_data'
+  MJFconstants.data_type_project = 'project_data'
+  MJFconstants.project_data = MJFconstants.teaching_period + '_' + MJFconstants.data_type_project
+  MJFconstants.student_data = MJFconstants.teaching_period + '_' + MJFconstants.data_type_student
+---

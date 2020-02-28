@@ -1,6 +1,6 @@
 ---
-# Must be defined.  Is displayed on the CSV importer
-template: MJFimport_message
+# Template text to display when importing projects
+template: MJFprojects_message
 content: |
   ### LLAW3301 Projects Import
   
@@ -13,6 +13,23 @@ content: |
   **No records in table**
   %endif
 ---
+# Template text to display when importing students
+template: MJFstudents_message
+content: |
+  ### LLAW3301 Student Data Import
+  
+  If you proceed, the current student data will be overwritten.  Current data
+  is in the table below.
+  
+  %if current_students_data:
+  ${ student_data_table }
+  %else:
+  **No records in table**
+  %endif
+---
+
+# Used to display projects to be added / already added to
+# the projects DAstore key
 table: current_projects_table
 rows: current_projects_data
 columns:
@@ -24,4 +41,20 @@ columns:
       row_item['Description']
   - URL: |
       '[Link](' + row_item['URL'] + ')'
+---
+# Used to display projects to be added / already added to
+# the students DAstore key
+table: student_data_table
+rows: current_students_data
+columns:
+    - FAN: |
+        row_item['FAN']
+    - First Name: |
+        row_item['first_name']
+    - Last Name: |
+        row_item['last_name']
+    - Email: |
+        row_item['email']
+    - Seminar: |
+        row_item['seminar']
 ---

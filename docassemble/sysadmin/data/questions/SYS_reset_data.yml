@@ -1,0 +1,18 @@
+# Erases a data store
+# Objects and constants copied from survey_import_main.
+---
+include:
+  - SYS_survey_constants.yml
+---
+mandatory: True
+code: |
+  data_key = MJFconstants.student_data
+  llaw3301_data.delete(data_key)
+---
+mandatory: True
+question: Data deleted
+subquestion: |
+  ${ llaw3301_data }
+buttons:
+  - Exit: exit
+  - Restart: restart

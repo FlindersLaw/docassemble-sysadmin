@@ -14,7 +14,7 @@ code: |
   # These change every semester
   MJFconstants.teaching_period = '2020_S1'
   MJFconstants.topic_guide_URL = 'https://flo.flinders.edu.au/mod/resource/view.php?id=2668148'
-  MJFconstants.due_date = datetime.datetime(2020, 3, 6)
+  MJFconstants.due_date = datetime.datetime(2020, 3, 6, hour=23, minute=59, second=59)
   
   # These should remain, well, constant!
   MJFconstants.aglc_formatted_due_date = format_date(MJFconstants.due_date, 'd MMMM YYYY')

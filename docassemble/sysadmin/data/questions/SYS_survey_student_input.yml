@@ -4,7 +4,13 @@ include:
   - SYS_survey_constants.yml
   - SYS_survey_import_questions.yml
 ---
-# Sart off by making sure we're logged in
+# Start off by closing if we're over the deadline
+mandatory: True
+code: |
+  if datetime.datetime.now() > MJFconstants.due_date:
+    too_late_screen
+---
+# Start off by making sure we're logged in
 mandatory: True
 code: |
   if not user_logged_in():
@@ -87,7 +93,7 @@ mandatory: True
 code: |
   write_prefs
   # Delete prefs so we can suck it in from the DAstore
-  del prefs
+  del MJFprefs_data
 ---
 mandatory: True
 question: Your preferences have been recorded
@@ -101,6 +107,7 @@ subquestion: |
   Second Preference | ${projects_dictionary[prefs[1]]}
   Third Preference  | ${projects_dictionary[prefs[2]]}
 
+  Prefs saved: ${MJFprefs_data['timestamp']}
 buttons:
   - Exit and Log out: exit_logout
     url: https://docassemble.flinders.edu.au
@@ -148,13 +155,22 @@ code: |
 ---
 # Writes preferences to DAStore
 code: |
-  llaw3301_data.set(prefs_key, prefs)
+  MJFdata = {}
+  MJFdata['timestamp'] = datetime.datetime.now()
+  MJFdata['prefs'] = prefs
+  llaw3301_data.set(prefs_key, MJFdata)
   write_prefs = True
 ---
+# Extract prefs data from the DAStore
+code: |
+  MJFprefs_data = llaw3301_data.get(prefs_key)
+---
+# Add a timestamp bef
 # Gets preferences from the DAstore
 code: |
-  prefs = llaw3301_data.get(prefs_key)
-  if not prefs:
+  if MJFprefs_data:
+    prefs = MJFprefs_data['prefs']
+  else:
     prefs = ['', '', '']
 ---
 # Get the elements for the projects drop-down menu.  Format it as a list of two-element dictionaries.
@@ -176,3 +192,11 @@ code: |
     item_value = item_key + ': ' + MJFitem['Description'] + ' (' + MJFitem['Organisation'] + ')'
     projects_dictionary[item_key] = item_value
 ---
+event: too_late_screen
+question: Too late!
+subquestion: |
+  The deadline for registering preferences was **${ MJFconstants.aglc_formatted_due_date }**.
+  
+  No preferences can be recorded now.  You will be assigned a project at random.
+buttons:
+  - Exit: exit

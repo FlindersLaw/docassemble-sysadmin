@@ -1,0 +1,178 @@
+# This is the script that asks the students to enter their preferences
+---
+include:
+  - SYS_survey_constants.yml
+  - SYS_survey_import_questions.yml
+---
+# Sart off by making sure we're logged in
+mandatory: True
+code: |
+  if not user_logged_in():
+    require_login_screen
+---
+mandatory: True
+question:  Record your project preferences
+subquestion: |
+  As per the [Topic Guide](${MJFconstants.topic_guide_URL}),
+  you will be assigned to work on a project
+  as part of this course.  You will be working in groups of 3 - 5.
+
+  Please indicate your preference as to which project you would prefer
+  to work on.  There is a table on the preferences selection page
+  that lists all the projects
+  and provides links to the Problem Statements prepared by each client.
+  Have a read of the problem statements before you make your decision.
+
+  You must complete this survey by **${ MJFconstants.aglc_formatted_due_date }**
+
+  There is no guarantee that you will be allocated a project on your preference
+  list (although it does increase your chances!).
+
+  If you do not sumbit a preference, then you will be allocated a project
+  at random.
+
+  If you change your mind before ${ MJFconstants.aglc_formatted_due_date }, just re-run this
+  app and update your preferences
+
+  With that out the way, let's get started!
+buttons:
+  - Continue: continue
+  - Exit: exit
+---
+# Initialise prefs before we record them
+# mandatory: True
+# code: |
+#   # Set three empty elements
+#   prefs = ['', '', '']
+---
+mandatory: True
+question: Record Your Preferences
+subquestion: |
+  Before you continue, make sure of the following:
+
+  - your information in the table below is correct, particularly your seminar group;
+  - if you are not allocated to a seminar, please do not register your preferences.  Come and see me instead.
+
+  Key|Value
+  ---|---
+  FAN    | ${the_user['FAN']}
+  Name   | ${the_user['first_name']} ${the_user['last_name']}
+  Seminar| ${the_user['seminar']}
+
+  #### Preferences
+  If your details are correct please enter your preferences and press 'Continue'.
+
+  A table of projects is below for your reference.
+
+under: |
+  #### List of projects
+  Read the Problem Statements for each project before you make your decision.  
+  Problem Statements are available on FLO and links are provided in this table.
+
+  ${current_projects_table}
+
+fields:
+  - First Preference: prefs[0]
+    code: |
+      projects_drop_down
+  - Second Preference: prefs[1]
+    code: |
+      projects_drop_down
+  - Third Preference: prefs[2]
+    code: |
+      projects_drop_down
+---
+# Write the preferences to the DAstore
+mandatory: True
+code: |
+  write_prefs
+  # Delete prefs so we can suck it in from the DAstore
+  del prefs
+---
+mandatory: True
+question: Your preferences have been recorded
+subquestion: |
+  Your preferences have been recorded.  If you wish to change them
+  please re-run this survey before ${MJFconstants.aglc_formatted_due_date}
+
+  Preference|Your Selection
+  ---|---
+  First Preference  | ${projects_dictionary[prefs[0]]}
+  Second Preference | ${projects_dictionary[prefs[1]]}
+  Third Preference  | ${projects_dictionary[prefs[2]]}
+
+buttons:
+  - Exit: exit
+    url: https://flinders.docassemble.edu.au
+  - Restart: restart
+---
+event: require_login_screen
+question: |
+  You need to log in to register your preferences
+buttons:
+  - Log in: leave
+    url: ${ url_of('login', next=interview_url())}
+  - Exit: exit
+    url: https://docassemble.flinders.edu.au
+---
+# Get the current projects
+code: |
+  current_projects_data = llaw3301_data.get(MJFconstants.project_data)
+---
+# Get the current student data from the DAstore
+code: |
+  current_students_data = llaw3301_data.get(MJFconstants.student_data)
+---
+# Get the record for this student
+code: |
+  the_user = {}
+  the_user['FAN'], _ = user_info().email.split('@', maxsplit=1)
+  # Populate with empty records so can be displayed in table if
+  # nothing is found
+  the_user['first_name'] = 'Record not found'
+  the_user['last_name'] = 'Record not found'
+  the_user['seminar'] = 'Record not found'
+
+  for MJFitem in current_students_data:
+    if MJFitem['FAN'] == the_user['FAN']:
+      # We've found our record.  Extract data
+      the_user['first_name'] = MJFitem['first_name']
+      the_user['last_name']  = MJFitem['last_name']
+      the_user['seminar']    = MJFitem['seminar']
+      # and stop the loop
+      break
+---
+# Preference key
+code: |
+  prefs_key = MJFconstants.survey_input_record + the_user['FAN']
+---
+# Writes preferences to DAStore
+code: |
+  llaw3301_data.set(prefs_key, prefs)
+  write_prefs = True
+---
+# Gets preferences from the DAstore
+code: |
+  prefs = llaw3301_data.get(prefs_key)
+  if not prefs:
+    prefs = ['', '', '']
+---
+# Get the elements for the projects drop-down menu.  Format it as a list of two-element dictionaries.
+# See https://docassemble.org/docs/fields.html#code
+code: |
+  projects_drop_down = []
+  for MJFitem in current_projects_data:
+    item_key = MJFitem['Project Identifier']
+    item_value = item_key + ' ' + MJFitem['Description'] + ' (' + MJFitem['Organisation'] + ')'
+    projects_drop_down.append(
+      { item_key : item_value }
+    )
+---
+# Get a projects dictionary for displaying selections in the last screen
+code: |
+  projects_dictionary = {}
+  for MJFitem in current_projects_data:
+    item_key = MJFitem['Project Identifier']
+    item_value = item_key + ': ' + MJFitem['Description'] + ' (' + MJFitem['Organisation'] + ')'
+    projects_dictionary[item_key] = item_value
+---

@@ -1,0 +1,25 @@
+# Reads data from a key in the data store
+---
+include:
+  - SYS_survey_constants.yml
+---
+mandatory: True
+question: Data read
+subquestion: |
+
+  Key: ${data_key}
+
+  Data:
+
+  ${ the_data }
+buttons:
+  - Exit: exit
+  - Restart: restart
+---
+code: |
+  the_data = llaw3301_data.get(data_key)
+---
+question: Enter data key
+fields:
+  - Data Key: data_key
+---

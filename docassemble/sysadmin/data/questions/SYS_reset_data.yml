@@ -6,13 +6,25 @@ include:
 ---
 mandatory: True
 code: |
-  data_key = MJFconstants.student_data
   llaw3301_data.delete(data_key)
 ---
 mandatory: True
 question: Data deleted
 subquestion: |
-  ${ llaw3301_data }
+  Key: ${data_key}
+
+  Data:
+
+  ${ llaw3301_data.get(data_key) }
 buttons:
   - Exit: exit
   - Restart: restart
+---
+question: Enter data key
+subquestion: |
+  Enter data key to delete
+
+  ${ MJFconstants }
+fields:
+  - Data key: data_key
+---

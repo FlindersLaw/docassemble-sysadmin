@@ -1,6 +1,9 @@
 # Erases a data store
 # Objects and constants copied from survey_import_main.
 ---
+imports:
+  - datetime
+---
 objects:
   - llaw3301_data: DAStore.using(base='global')
   - MJFconstants: DAObject
@@ -8,9 +11,17 @@ objects:
 # Define 'constants' here
 mandatory: True
 code: |
+  # These change every semester
   MJFconstants.teaching_period = '2020_S1'
+  MJFconstants.topic_guide_URL = 'https://flo.flinders.edu.au/mod/resource/view.php?id=2668148'
+  MJFconstants.due_date = datetime.datetime(2020, 3, 6)
+  
+  # These should remain, well, constant!
+  MJFconstants.aglc_formatted_due_date = format_date(MJFconstants.due_date, 'd MMMM YYYY')
   MJFconstants.data_type_student = 'student_data'
   MJFconstants.data_type_project = 'project_data'
   MJFconstants.project_data = MJFconstants.teaching_period + '_' + MJFconstants.data_type_project
   MJFconstants.student_data = MJFconstants.teaching_period + '_' + MJFconstants.data_type_student
+  # Survey input records start with this string and have the FAN appended to them
+  MJFconstants.survey_input_record = MJFconstants.teaching_period + '_survey_input_'
 ---

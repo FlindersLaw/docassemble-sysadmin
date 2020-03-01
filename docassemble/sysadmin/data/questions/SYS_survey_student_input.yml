@@ -65,12 +65,14 @@ subquestion: |
   Name   | ${the_user['first_name']} ${the_user['last_name']}
   Seminar| ${the_user['seminar']}
 
+  <hr>
   #### Preferences
   If your details are correct please enter your preferences and press 'Continue'.
 
   A table of projects is below for your reference.
 
 under: |
+  <hr>
   #### List of projects
   Read the Problem Statements for each project before you make your decision.  
   Problem Statements are available on FLO and links are provided in this table.

@@ -1,0 +1,92 @@
+# Processes the submitted survey preferences and allocates students
+# to seminars.
+#
+# Logic flow goes something like this:
+# - read all student data into a DAList
+# - read all the project data into DAList
+# - project data structure must record seminar the project is allocated to
+#   and number of students allocated to it
+# - 
+# for each student in the list
+# - choose a student at random
+# - allocate preferences based on following:
+#   - students can't be allocated to a project already  in another seminar
+#   - students can't be allocated to a project that is full
+#   - try to allocate first, second, third prefs
+#   - if that fails (or if there are no prefs)
+#     - construct a list of projects allocated to that seminar plus
+#       projects not allocated to any seminar
+#     - only add projects with available student spots to the list
+#     - projects should not be over-allocated to a seminar.  We have
+#       19 projects so no seminar should have more than 10 (don't
+#       hard-code these numbers though - cater for different numbers
+#       of projects and different numbers of seminars)
+#     - allocate a student to a random project 
+#     - allocate that project to that seminar
+#
+# Display the output as a table ie:
+# Seminar | Project ID | Project Description | Members
+#
+# Off we go!!
+---
+include:
+  - SYS_survey_constants.yml
+---
+imports:
+  - random
+---
+# Initialise random number generator
+mandatory: True
+code: |
+  random.seed = (os.urandom(1024))
+---
+# Everything should be driven from this single mandatory block (he says)
+mandatory: True
+question: Project Allocation
+subquestion:
+  TODO: Something descriptive to go here at some stage
+
+  ${ project_allocation_table }
+---
+table: project_allocation_table
+rows: project_allocation_data
+columns:
+  - Seminar Number:
+      row_item['project_seminar']
+  - Project ID:
+      row_item['project_id']
+  - Project Description:
+      row_item['project_description']
+  - Members:
+      row_item['project_members']
+---
+# Get the current projects
+code: |
+  current_projects_data = llaw3301_data.get(MJFconstants.data_type_project)
+---
+# Get the current student data
+code: |
+  current_students_data = llaw3301_data.get(MJFconstants.data_type_student)
+---
+# First attempt at main block
+code: |
+  for a_student in shuffled_students:
+    # Get the student's pref data
+
+---
+# Convert projects data into a dictionary - easier to access
+code: |
+  projects_dictionary = {}
+  for MJFitem in current_projects_data:
+    item_key = MJFitem['Project Identifier']
+    item_value = item_key + ': ' + MJFitem['Description'] + ' (' + MJFitem['Organisation'] + ')'
+    projects_dictionary[item_key] = item_value
+---
+# Get a student record from the DAstore
+code:
+  student
+---
+# Shuffles the list of students
+code: |
+  shuffled_students = random.shuffle(current_students_data, len(current_students_data))
+---

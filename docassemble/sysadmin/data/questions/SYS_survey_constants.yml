@@ -15,8 +15,10 @@ code: |
   MJFconstants.teaching_period = '2020_S1'
   MJFconstants.topic_guide_URL = 'https://flo.flinders.edu.au/mod/resource/view.php?id=2668148'
   MJFconstants.due_date = datetime.datetime(2020, 3, 10, hour=23, minute=59, second=59)
+  MJFconstants.max_group_size = 5
   
   # These should remain, well, constant!
+  MJFconstants.seminar_prefix = 'Seminar'
   MJFconstants.aglc_formatted_due_date = format_date(MJFconstants.due_date, 'd MMMM YYYY')
   MJFconstants.data_type_student = 'student_data'
   MJFconstants.data_type_project = 'project_data'

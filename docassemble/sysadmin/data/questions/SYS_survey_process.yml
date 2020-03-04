@@ -35,13 +35,8 @@ include:
 imports:
   - random
 ---
-# Initialise random number generator
-mandatory: True
-code: |
-  random.seed = (os.urandom(1024))
----
-# First attempt at main block
-# Easier if I make this mandatory
+# First we process all students who have submitted preferences
+# and we attempt to place them in one of their preferred projects
 mandatory: True
 code: |
   for a_student in shuffled_students:
@@ -57,80 +52,100 @@ code: |
 
     # Get the student's pref data
     # del so it's always reset
-    del a_prefs_entry
-    a_prefs_entry
+    a_prefs_entry = llaw3301_data.get(MJFconstants.survey_input_record + a_student['FAN'])
 
-    # Run through each pref.  For each pref
-    # - check the project's seminar matches the student's seminar
-    # - if the project seminaris empty, allocate it to the student's seminar
-    # - allocate the student if seminar matches and there are 
-    #   vacancies
-    # only do this if we have a record.  No record => no prefs
-    if a_prefs_entry is not None:
-      for a_pref in a_prefs_entry['prefs']:
-        if projects_dictionary[a_pref]['seminar'] == a_student['seminar'] or
-            projects_dictionary[a_pref]['seminar'] is None:
-
-          # Student can be added, but only if the max group size hasn't been
-          # exceeded yet.
-          if len(projects_dictionary[a_pref]['students']) < MJFconstants.max_group_size:
-            # Now we're good to go.  The project can be (re-)assigned to this 
-            # seminar and the student can be added
-            projects_dictionary[a_pref]['seminar'] = a_student['seminar']
-            projects_dictionary[a_pref]['students'].append(a_student['FAN'])
-            a_student['allocated'] = True
-
-    # At this point if the student hasn't been added to a project it means 
-    # that either their preferences were exhausted or they didn't record
-    # any preferences.  So, we add them to a random project.
-    
-    if a_student['allocated']:
-      # If they're allocated we just move on.
+    # We don't process here if the student did not register preferences
+    if a_prefs_entry is None:
       continue
-    
+
+    # Now fit students into their prefs
+    for a_pref in a_prefs_entry['prefs']:
+      if ( projects_dictionary[a_pref]['seminar'] == a_student['seminar'] or  projects_dictionary[a_pref]['seminar'] == '' ) and ( not a_student['allocated'] ):
+
+        # Student can be added, but only if the max group size hasn't been
+        # exceeded yet.
+        if len(projects_dictionary[a_pref]['students']) < MJFconstants.max_group_size:
+          # Now we're good to go.  The project can be (re-)assigned to this 
+          # seminar and the student can be added
+          projects_dictionary[a_pref]['seminar'] = a_student['seminar']
+          projects_dictionary[a_pref]['students'].append(a_student['FAN'])
+          a_student['allocated'] = True
+          # Stop processing prefs once allocated
+          break
+  
+  # That's it.  We still have a stack of students who either have no prefs
+  # or did have prefs but could not be allocated to any of their preferred
+  # seminars.  They are dealt with in the following mandatory block
+---
+# This block manages students who have not been allocated and who either
+# did not allocate preferences or were not able to be assigned to their
+# preferred project.
+mandatory: True
+code: |
+  for a_student in shuffled_students:
+    # DA may run this loop more than one time.  Skip over
+    # students already allocated
+    if a_student['allocated']:
+      continue
+  
+    # If the student isn't allocated to a seminar then we skip.  Students
+    # allocated to a seminar have a 'seminar' value that begins with 'Seminar'
+    if a_student['seminar'][:7] != MJFconstants.seminar_prefix:
+      continue
+
+    # Add student to a random project.
+    # Find the first available project either unallocated or allocated to 
+    # their seminar group and allocate them to it.  
     for a_project in shuffled_projects:
       project_id = a_project['Project Identifier']
-
-      if ( projects_dictionary[project_id]['seminar'] == a_student['seminar'] or 
-            projects_dictionary[project_id]['seminar'] is None 
-          ) and (
-            len(projects_dictionary[project_id]['students']) < MJFconstants.max_group_size )
-          ):
+      if ( projects_dictionary[project_id]['seminar'] == a_student['seminar'] or projects_dictionary[project_id]['seminar'] == '' ) and ( len(projects_dictionary[project_id]['students']) < MJFconstants.max_group_size ):
         # We have a project in the right seminar with vacancies so allocate
         # the student here
         projects_dictionary[project_id]['seminar'] = a_student['seminar']
         projects_dictionary[project_id]['students'].append(a_student['FAN'])
         a_student['allocated'] = True
         # Get out of the loop once we're allocated
-        continue
+        break
 ---
 # Displays the table
 mandatory: True
 question: Project Allocation
-subquestion:
+subquestion: |
   TODO: Something descriptive to go here at some stage
 
+  Project alloation by seminar:
+
+  Seminar|No. Projects
+  ---|---
+  %for a_seminar in seminar_allocations:
+  ${a_seminar} | ${str(seminar_allocations[a_seminar])}
+  %endfor
+
   ${ project_allocation_table }
+buttons:
+  - Exit: exit
+    url: https://docassemble.flinders.edu.au
+  - Restart: Restart
 ---
 table: project_allocation_table
 rows: current_projects_data
 columns:
   - Project ID:
-      row_item['project_id']
+      row_item['Project Identifier']
   - Project Description:
-      row_item['project_description']
+      row_item['Description']
   - Allocated Seminar:
       projects_dictionary[row_item['Project Identifier']]['seminar']
-  - Members:
-      projects_dictionary[row_item['Project Identifier']]['students']
+  - Members: |
+      pretty_preferences[row_item['Project Identifier']]  
 ---
 # Get the current projects
 code: |
-  current_projects_data = llaw3301_data.get(MJFconstants.data_type_project)
+  current_projects_data = llaw3301_data.get(MJFconstants.project_data)
 ---
 # Get the current student data
 code: |
-  current_students_data = llaw3301_data.get(MJFconstants.data_type_student)
+  current_students_data = llaw3301_data.get(MJFconstants.student_data)
 ---
 # Convert projects data into a dictionary - easier to access
 # Each dictionary has the following in a sub-dictionary
@@ -147,19 +162,71 @@ code: |
         'seminar'     : '',
         'students'    : []
       }
---
-# Get a student record from the DAstore
-code:
-  a_prefs_entry = llaw3301_data.get(MJFconstants.survey_input_record + a_student['FAN'])
 ---
 #Shuffles the list of students
 code: |
-  shuffled_students = random.shuffle(current_students_data, len(current_students_data))
+  shuffled_students = random.sample(list(current_students_data), len(current_students_data))
   # Initialise all students to be unallocated
   for a_shuffled_student in shuffled_students:
     a_shuffled_student['allocated'] = False
 ---
 # Shuffles the list of projects - for random allocation
 code: |
-  shuffled_projects = random.shuffle(current_projects_data, len(current_projects_data))
+  shuffled_projects = random.sample(list(current_projects_data), len(current_projects_data))
 ---
+# Make a student dictionary - for printing student details
+code: |
+  students_dictionary = {}
+  for MJFitem in current_students_data:
+    prefs_record = llaw3301_data.get(MJFconstants.survey_input_record + MJFitem['FAN'])
+    if prefs_record is None:
+      prefs_data = 'No preferences'
+    else:
+      prefs_data = prefs_record['prefs']
+    
+    item_key = MJFitem['FAN']
+    item_value = {
+      'first_name': MJFitem['first_name'],
+      'last_name' : MJFitem['last_name'],
+      'seminar'   : MJFitem['seminar'],
+      'allocated' : MJFitem['allocated'],
+      'prefs'     : prefs_data
+    }
+    students_dictionary[item_key] = item_value
+---
+# So we can display the preference selections in a meaninful way we
+# format the FANs in the prefs list to look beautiful using more
+# information and HTML
+code: |
+  # We will store all the pretty preferences here
+  pretty_preferences = {}
+  for a_project in current_projects_data:
+    # Get a project identifier
+    a_key = a_project['Project Identifier']
+    
+    # Get the allocated students from the projects_dictionary
+    the_students = projects_dictionary[a_key]['students']
+    
+    # present the list of students nicely formatted as a HTML list
+    students_string = '<ul>'
+    for a_student in the_students:
+      student_record = students_dictionary[a_student]
+      students_string += '<li>{} {} ({})\n'.format(
+                                                        student_record['first_name'],
+                                                        student_record['last_name'],
+                                                        a_student )
+    # close the list
+    students_string += '</ul>\n'
+    pretty_preferences[a_key] = students_string
+---
+# How many projects are allocated to each seminar
+code: |
+  seminar_allocations = {}
+  for a_project in projects_dictionary:
+    the_seminar = projects_dictionary[a_project]['seminar']
+    if the_seminar == '':
+      the_seminar = 'Not Allocated'
+    try:
+      seminar_allocations[the_seminar] += 1
+    except KeyError:
+      seminar_allocations[the_seminar] = 1

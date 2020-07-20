@@ -5,34 +5,34 @@ table: accounts_table
 rows: accounts_import
 columns:
   - FAN: |
-      row_item['FAN']
+      row_item.FAN
   - First Name: |
-      row_item['first_name']
+      row_item.first_name
   - Last Name: |
-      row_item['last_name']
+      row_item.last_name
   - Email:
-      row_item['email']
+      row_item.email
   - Password:
-      row_item['password']
+      row_item.password
   - Privileges:
-      '[Link](' + row_item['privileges'] + ')'
+      row_item.privileges
 ---
 # Table to display account creation status
 table: accounts_created_table
 rows: accounts_import
 columns:
   - FAN: |
-      row_item['FAN']
+      row_item.FAN
   - First Name: |
-      row_item['first_name']
+      row_item.first_name
   - Last Name: |
-      row_item['last_name']
+      row_item.last_name
   - Password: |
-      row_item['password']
+      row_item.password
   - Account creation status:
-      row_item['status']
+      row_item.status
   - Email sent status:
-      row_item['email_status']
+      row_item.email_status
 ---
 question: Select input file
 subquestion: |
@@ -45,11 +45,11 @@ fields:
   - no label: csv_import
     datatype: file
 ---
-template: MJFemail_message
+template: MJFtemplate
 subject: |
   Access credentials for LLAW3301 Law in a Digital Age
 content: |
-  Dear ${ MJFrecipient }
+  Dear ${ accounts_import[i].recipient }
   
   Welcome to LLAW3301 Law in a Digital Age.
   
@@ -79,7 +79,7 @@ content: |
  
   **DO NOT REPLY TO THIS EMAIL**
   as your reply will be lost.  Instead, look for my contact details in the
-  [Topic Guide](https://flo.flinders.edu.au/mod/resource/view.php?id=2668148).
+  [Topic Guide](https://flo.flinders.edu.au/mod/resource/view.php?id=2756805).
   
   Wishing you all the best for this topic.  It's new, it's exciting and it's
   not as scary as you may think!
@@ -89,7 +89,7 @@ content: |
 ---
 attachment:
   - docx template file: Access_to_Docassemble_and_GitHub.docx
-    variable name: MJFattachment
+    variable name: accounts_import[i].attachment
     filename: Access to Docassemble and GitHub
     valid formats:
       - docx

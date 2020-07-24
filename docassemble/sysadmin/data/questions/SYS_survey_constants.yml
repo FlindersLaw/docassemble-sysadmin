@@ -11,13 +11,24 @@ objects:
 # Define 'constants' here
 mandatory: True
 code: |
+  #
   # These change every semester
-  MJFconstants.teaching_period = '2020_S1'
+  #
+  # Teaching semester
+  MJFconstants.teaching_period = '2020_S2'
+  
+  # Find the Topic Guide in FLO and paste URL in here
   MJFconstants.topic_guide_URL = 'https://flo.flinders.edu.au/mod/resource/view.php?id=2668148'
+  
+  # Date the survey must be completed by the students
   MJFconstants.due_date = datetime.datetime(2020, 3, 10, hour=23, minute=59, second=59)
+  
+  # Max size for a student project group
   MJFconstants.max_group_size = 5
   
+  #
   # These should remain, well, constant!
+  #
   MJFconstants.seminar_prefix = 'Seminar'
   MJFconstants.aglc_formatted_due_date = format_date(MJFconstants.due_date, 'd MMMM YYYY')
   MJFconstants.data_type_student = 'student_data'

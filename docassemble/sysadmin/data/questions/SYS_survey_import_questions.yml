@@ -34,13 +34,11 @@ table: current_projects_table
 rows: current_projects_data
 columns:
   - Project ID: |
-      row_item['Project Identifier']
+      '[{}]({})'.format(row_item['Project Identifier'], row_item['Name'])
   - Organisation: |
       row_item['Organisation']
   - Description: |
-      row_item['Description']
-  - URL: |
-      '[Link](' + row_item['URL'] + ')'
+      row_item['Project Description']
 ---
 # Used to display projects to be added / already added to
 # the students DAstore key

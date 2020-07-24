@@ -7,9 +7,11 @@
 # question block.
 ---
 objects:
-  - csv_data: DAList.using(auto_gather=False, gathered=True)
+  - csv_data: DAList.using(auto_gather=False, there_are_any=True)
 ---
 code: |
+  csv_data.clear()
+
   # Read the data into a CSV object
   all_the_lines = csv_import.slurp()
   
@@ -41,7 +43,7 @@ code: |
     # Increment the loop index
     i += 1
     
-  import_csv = True
+  csv_data.gathered = True
 ---
 question: Import CSV File
 subquestion: |

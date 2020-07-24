@@ -1,0 +1,85 @@
+# Code to import an excel spreadsheet into a DAList of dictionaries
+#
+# The spreadhseet to be imported is an Excel export of a Sharepoint
+# Document library list.  It is expected to contain these fields:
+# - Project Identifier
+# - Project Description
+# - Name
+# The 'Name' column contains a hyperlink to the problem statement.
+#
+# Other Assumptions:
+# - The Excel workbook contains only one sheet
+# - The data starts from cell A1
+# - The first row contains column headers
+#
+# These assumptions conform to the Problem Statement SharePoint
+# list which should be configured as per this example:
+# https://flinders.sharepoint.com/sites/LLAW3301_2020_S2/Problem%20Statements%20DL/Forms/AllItems.aspx
+#
+---
+imports:
+  - openpyxl
+---
+code: |
+  # Load the workbook
+  wb = openpyxl.load_workbook(filename=xls_filename)
+
+  # Assume we have only one worksheet
+  ws = wb.active
+---
+# Get the filename of the spreadsheet
+code: |
+  xls_filename = ps_import.path()
+---
+code: |
+  # Iterate through all the rows.  Store results
+  # here
+  ps_data = []
+  # The first row contains the column headings
+  # which we store in key_list
+  key_list = []
+  for a_row in ws.rows:
+    data_structure = {}
+    for a_cell in a_row:
+      if a_cell.row == 1:
+        key_list.append(a_cell.value)
+      else:
+        key_index = a_cell.col_idx - 1
+        # Hyperlinks are kept in the 'Name' column
+        if key_list[key_index] == 'Name':
+          data_structure[key_list[key_index]] = a_cell.hyperlink.target
+        else:
+          data_structure[key_list[key_index]] = a_cell.value
+    
+    # Iteration over first row will yield an empty data structure.  Don't append it
+    if len(data_structure) > 0:
+        ps_data.append(data_structure)
+
+  current_projects_data = ps_data
+  ps_data_processed = True
+---
+question: Import Problem Statements
+subquestion: |
+  ${ MJFimport_message }
+  
+  The file to be imported should be an excel export of a SharePoint 
+  list created using the 'Export to Excel' button on the SharePoint
+  list itself.
+
+  The Excel files should contain these columns.  If it does not, 
+  then **the import will fail**.
+
+  - Project Identifier
+  - Project Description
+  - Organisation
+  - Name (which contains a hyperlink to the Problem Statement PDF)
+
+  In addition:
+  - The Excel spreadhseet should contain only one worksheet tab
+  - The data should start in cell A1 (ie: the topmost left cell
+    of the worksheet)
+
+fields:
+  - no label: ps_import
+    datatype: file
+---

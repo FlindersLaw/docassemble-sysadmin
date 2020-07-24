@@ -1,0 +1,83 @@
+---
+# Read in the input file.  It's read in as a string.  We convert
+# it to a list by using splitlines() and then extract relevant
+# items for accounts_import, being:
+# - FAN
+# - First name
+# - Last Name
+# - email
+# - Seminar group
+code: |
+  accounts_import.clear()
+
+  file_as_string = csv_import.slurp()
+  for line in file_as_string.splitlines():
+    elements = line.replace('"', '').split(',', maxsplit=4)
+    # Skip the header row
+    if elements[0] == 'FAN':
+      continue
+    
+    # Otherwise, we process.
+    one_item = DAObject()
+    one_item.FAN, one_item.first_name, one_item.last_name, one_item.email, the_rest = elements
+
+    # Get the Seminar
+    # We assume the CSV always lists seminars as 'Seminar nn'
+    # and assume user is in only one Seminar
+    for group in the_rest.split(','):
+      if group.lower()[:7] == 'seminar':
+        MJFseminar = 'seminar_' + group.lower()[8:]
+        break
+    one_item.seminar = MJFseminar
+
+    # Set password and privileges
+    one_item.password = ''.join(random.choice(MJFpwchars) for i in range(MJFpwlength))
+    one_item.privileges = ['developer']
+    
+    # Add to our accounts_import DAList
+    accounts_import.append(one_item)
+
+  accounts_import.gathered = True
+---
+# Creates account for a user in accounts_import
+code: |
+  # Additional information required as part of API call
+  additional_information = {
+    'first_name': accounts_import[i].first_name,
+    'last_name' : accounts_import[i].last_name,
+    'timezone'  : 'Australia/Adelaide'
+  }
+
+  # Create the account.  Store the result in 'status'. We
+  # store either 'OK' or the contents of the error
+  try:
+    create_user(
+        accounts_import[i].email,
+        accounts_import[i].password,
+        privileges=accounts_import[i].privileges,
+        info=additional_information
+    )
+    temp_status = 'OK'
+  except Exception as e:
+    temp_status = str(e)
+
+  accounts_import[i].status = temp_status
+---
+# Send emails to users.  Only send email if the account
+# creation status is 'OK'
+code: |
+  if accounts_import[i].status == 'OK':
+    accounts_import[i].email_status = send_email(
+                            to=accounts_import[i].recipient, 
+                            template=MJFtemplate,
+                            attachments=[accounts_import[i].attachment])
+  else:
+    accounts_import[i].email_status = 'Account not created'
+---
+# Create a recipient object so can send emails
+code: |
+    accounts_import[i].recipient = Individual()
+    accounts_import[i].recipient.name.first = accounts_import[i].first_name
+    accounts_import[i].recipient.name.last = accounts_import[i].last_name
+    accounts_import[i].recipient.email = accounts_import[i].email
+---

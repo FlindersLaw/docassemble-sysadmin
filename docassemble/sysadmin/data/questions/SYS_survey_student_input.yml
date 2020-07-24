@@ -181,7 +181,7 @@ code: |
   projects_drop_down = []
   for MJFitem in current_projects_data:
     item_key = MJFitem['Project Identifier']
-    item_value = item_key + ' ' + MJFitem['Description'] + ' (' + MJFitem['Organisation'] + ')'
+    item_value = item_key + ' ' + MJFitem['Project Description'] + ' (' + MJFitem['Organisation'] + ')'
     projects_drop_down.append(
       { item_key : item_value }
     )
@@ -191,7 +191,7 @@ code: |
   projects_dictionary = {}
   for MJFitem in current_projects_data:
     item_key = MJFitem['Project Identifier']
-    item_value = item_key + ': ' + MJFitem['Description'] + ' (' + MJFitem['Organisation'] + ')'
+    item_value = item_key + ': ' + MJFitem['Project Description'] + ' (' + MJFitem['Organisation'] + ')'
     projects_dictionary[item_key] = item_value
 ---
 event: too_late_screen

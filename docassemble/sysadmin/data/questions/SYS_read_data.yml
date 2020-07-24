@@ -17,7 +17,7 @@ subquestion: |
   Key|Value
   ---|---
   %for a_key in llaw3301_data.keys():
-  ${a_key} | ${llaw3301_data.get(a_key)}
+  ${a_key} | `${llaw3301_data.get(a_key)}`
   %endfor
   %endif
 

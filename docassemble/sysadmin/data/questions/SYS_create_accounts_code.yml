@@ -19,11 +19,16 @@ code: |
     
     # Otherwise, we process.
     one_item = DAObject()
-    one_item.FAN, one_item.first_name, one_item.last_name, one_item.email, the_rest = elements
+    if len(elements) == 5:
+      one_item.FAN, one_item.first_name, one_item.last_name, one_item.email, the_rest = elements
+    else:
+      one_item.FAN, one_item.first_name, one_item.last_name, one_item.email = elements
+      the_rest = ''
 
     # Get the Seminar
     # We assume the CSV always lists seminars as 'Seminar nn'
     # and assume user is in only one Seminar
+    MJFseminar = 'No Seminar'
     for group in the_rest.split(','):
       if group.lower()[:7] == 'seminar':
         MJFseminar = 'seminar_' + group.lower()[8:]

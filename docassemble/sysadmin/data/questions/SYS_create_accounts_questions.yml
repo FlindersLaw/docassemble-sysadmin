@@ -47,16 +47,16 @@ fields:
 ---
 template: MJFtemplate
 subject: |
-  Access credentials for LLAW3301 Law in a Digital Age
+  Access credentials for ${ MJFtopic_name }
 content: |
   Dear ${ accounts_import[i].recipient }
   
-  Welcome to LLAW3301 Law in a Digital Age.
+  Welcome to *${ MJFtopic_name }.*
   
   As you know, you will be learning coding skills as part of this topic.
   In order to do this you need access to 
   [Docassemble](https://docassemble.org), which we will use to write our code,
-  and [GitHub](https://github.com), which we will use to share code in our teams.
+  and [GitHub](https://github.com), which we will use to share code.
 
   The attached document contains your credentials to log into the
   [Flinders Docassemble Server](https://docassemble.flinders.edu.au) and
@@ -74,12 +74,11 @@ content: |
 
   As you will find out during the course, if you have any issues, it is up to you 
   to contact the Topic Co-ordinator.  So, if you have any problems accessing either
-  Docassemble or GitHub, please come and see me **as soon as possible**.  It's
+  Docassemble or GitHub, please contact me **as soon as possible**.  It's
   best to sort these problems out sooner rather than later.
  
   **DO NOT REPLY TO THIS EMAIL**
-  as your reply will be lost.  Instead, look for my contact details in the
-  [Topic Guide](https://flo.flinders.edu.au/mod/resource/view.php?id=2756805).
+  as your reply will be lost.  Instead, look for my contact details in the Topic Guide.
   
   Wishing you all the best for this topic.  It's new, it's exciting and it's
   not as scary as you may think!
@@ -93,4 +92,14 @@ attachment:
     filename: Access to Docassemble and GitHub
     valid formats:
       - docx
+---
+question: Select Topic
+fields:
+  - Topic name: MJFtopic_name
+    datatype: radio
+    choices:
+      - "LLAW3301: Law in a Digital Age"
+      - "Flinders Law Beyond: Coding the Law"
+  - Intake period: MJFtopic_intake
+    hint: "eg: Semester 2 2020 / August 1 2020 Intake"
 ---

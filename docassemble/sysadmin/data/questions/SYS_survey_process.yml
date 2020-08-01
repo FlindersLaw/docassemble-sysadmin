@@ -126,6 +126,16 @@ buttons:
   - Exit: exit
     url: https://docassemble.flinders.edu.au
   - Restart: Restart
+attachment:
+  - name: Allocation Table
+    filename: allocation_table
+    content: |
+      # Student allocation Groups Prepared on ${today()}
+
+      %for a_line in csv_table:
+      ${a_line}
+      %endfor
+  
 ---
 table: project_allocation_table
 rows: current_projects_data
@@ -133,7 +143,7 @@ columns:
   - Project ID:
       row_item['Project Identifier']
   - Project Description:
-      row_item['Description']
+      row_item['Project Description']
   - Allocated Seminar:
       projects_dictionary[row_item['Project Identifier']]['seminar']
   - Members: |
@@ -156,7 +166,7 @@ code: |
   projects_dictionary = {}
   for MJFitem in current_projects_data:
     item_key = MJFitem['Project Identifier']
-    item_value = item_key + ': ' + MJFitem['Description'] + ' (' + MJFitem['Organisation'] + ')'
+    item_value = item_key + ': ' + MJFitem['Project Description'] + ' (' + MJFitem['Organisation'] + ')'
     projects_dictionary[item_key] = {
         'description' : item_value,
         'seminar'     : '',
@@ -218,6 +228,22 @@ code: |
     # close the list
     students_string += '</ul>\n'
     pretty_preferences[a_key] = students_string
+---
+# Display the preferences in table each row being:
+# Project Identifier, Project Desciption, Organisation, FAN, First name, Last Name
+code: |
+  csv_table = ["Project Identifier,Project Description,Organisation,FAN,First Name,Last Name"]
+  for a_project in current_projects_data:
+    proj_key = a_project['Project Identifier']
+    for a_student in projects_dictionary[proj_key]['students']:
+      csv_table.append('{},{},{},{},{},{}'.format(
+          proj_key, 
+          a_project['Project Description'],
+          a_project['Organisation'],
+          a_student,
+          students_dictionary[a_student]['first_name'],
+          students_dictionary[a_student]['last_name']
+      ))
 ---
 # How many projects are allocated to each seminar
 code: |

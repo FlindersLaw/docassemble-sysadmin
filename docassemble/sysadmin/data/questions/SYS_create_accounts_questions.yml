@@ -58,10 +58,11 @@ content: |
   [Docassemble](https://docassemble.org), which we will use to write our code,
   and [GitHub](https://github.com), which we will use to share code.
 
-  The attached document contains your credentials to log into the
-  [Flinders Docassemble Server](https://docassemble.flinders.edu.au) and
-  instructions for creating a GitHub account and connecting it to your
-  Docassemble account.
+  The attached document contains instructions for:
+  
+  - logging in to the [Flinders Docassemble Server](https://docassemble.flinders.edu.au);
+  - creating a GitHub account; and 
+  - connecting your GitHub account to your Docassemble account.
   
   In order to access Docassemble and GitHub, you will need a computer with
   a modern web

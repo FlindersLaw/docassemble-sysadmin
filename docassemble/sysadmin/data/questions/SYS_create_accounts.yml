@@ -10,6 +10,14 @@
 # - Populates name details into DA account
 # - emails each user and attaches PDF containing username, password and 
 #   access instructions.
+#
+# UPDATE: 4 Jan 2021
+# Connecting to Docassemble instructions have been modified so that 
+# users no longer need their initial passwords.  Instead, users reset
+# their password using the 'Forgot Password' link on Docassemble. 
+# However, this code still assigns users a random password.  I didn't
+# bother removing this code even though it's no longer necessary.
+
 ---
 # Use this to create password.
 imports:

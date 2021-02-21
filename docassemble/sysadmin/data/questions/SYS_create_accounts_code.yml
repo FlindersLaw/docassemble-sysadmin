@@ -35,6 +35,10 @@ code: |
         break
     one_item.seminar = MJFseminar
 
+    # Force the email to be FAN@flinders.edu.au
+    # (as some email entries contain first.last@flinders)
+    one_item.email = '{}@flinders.edu.au'.format(one_item.FAN)
+
     # Set password and privileges
     one_item.password = ''.join(random.choice(MJFpwchars) for i in range(MJFpwlength))
     one_item.privileges = ['developer']

@@ -109,7 +109,9 @@ code: |
     an_item['FAN'] = _entry['FAN']
     an_item['first_name'] = _entry['First name']
     an_item['last_name'] = _entry['Surname']
-    an_item['email'] = _entry['Email address']
+    # We don't trust the supplied email address.  Create a FAN@flinders... email instead
+    an_item['email'] = '{}@flinders.edu.au'.format(_entry['FAN'])
+    #an_item['email'] = _entry['Email address']
 
     # Find the seminar
     an_item['seminar'] = 'No Seminar'

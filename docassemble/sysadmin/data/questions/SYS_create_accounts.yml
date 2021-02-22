@@ -17,6 +17,14 @@
 # their password using the 'Forgot Password' link on Docassemble. 
 # However, this code still assigns users a random password.  I didn't
 # bother removing this code even though it's no longer necessary.
+#
+# UPDATE: 22 Feb 2021
+# The refreshed FLO uses different reports.  User reports no longer 
+# contain seminar information and the order of the fields in the report
+# has changed.  Code has been updated to reflect this.  Note: seminar
+# and password code still exists even though it is redundant.  I've
+# kept it in as it still runs and we may need it again one day
+
 
 ---
 # Use this to create password.

@@ -12,19 +12,15 @@ code: |
 
   file_as_string = csv_import.slurp()
   for line in file_as_string.splitlines():
-    elements = line.replace('"', '').split(',', maxsplit=4)
+    elements = line.replace('"', '').split(',', maxsplit=3)
     # Skip the header row
-    if elements[0] == 'FAN':
+    if elements[0] == 'First name':
       continue
     
     # Otherwise, we process.
     one_item = DAObject()
-    if len(elements) == 5:
-      one_item.FAN, one_item.first_name, one_item.last_name, one_item.email, the_rest = elements
-    else:
-      one_item.FAN, one_item.first_name, one_item.last_name, one_item.email = elements
-      the_rest = ''
-
+    one_item.first_name, one_item.last_name, one_item.FAN, the_rest = elements
+    
     # Get the Seminar
     # We assume the CSV always lists seminars as 'Seminar nn'
     # and assume user is in only one Seminar

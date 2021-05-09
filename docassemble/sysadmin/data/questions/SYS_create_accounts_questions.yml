@@ -99,6 +99,7 @@ fields:
   - Topic name: MJFtopic_name
     datatype: radio
     choices:
+      - "COMP3751 and LLAW3301 Collaboration"
       - "LLAW3301: Law in a Digital Age"
       - "Flinders Law Beyond: Coding the Law"
   - Intake period: MJFtopic_intake

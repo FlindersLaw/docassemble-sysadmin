@@ -47,8 +47,10 @@ code: |
   
     # If the student isn't allocated to a seminar then we skip.  Students
     # allocated to a seminar have a 'seminar' value that begins with 'Seminar'
-    if a_student['seminar'][:7] != MJFconstants.seminar_prefix:
-      continue
+    # UPDATE 4 March 2021
+    # We don't check seminars any more as all students are in a single seminar
+    # if a_student['seminar'][:7] != MJFconstants.seminar_prefix:
+    #   continue
 
     # Get the student's pref data
     # del so it's always reset
@@ -61,6 +63,7 @@ code: |
     # Now fit students into their prefs
     for a_pref in a_prefs_entry['prefs']:
       if ( projects_dictionary[a_pref]['seminar'] == a_student['seminar'] or  projects_dictionary[a_pref]['seminar'] == '' ) and ( not a_student['allocated'] ):
+      # if ( not a_student['allocated'] ):
 
         # Student can be added, but only if the max group size hasn't been
         # exceeded yet.
@@ -90,8 +93,8 @@ code: |
   
     # If the student isn't allocated to a seminar then we skip.  Students
     # allocated to a seminar have a 'seminar' value that begins with 'Seminar'
-    if a_student['seminar'][:7] != MJFconstants.seminar_prefix:
-      continue
+    # if a_student['seminar'][:7] != MJFconstants.seminar_prefix:
+    #   continue
 
     # Add student to a random project.
     # Find the first available project either unallocated or allocated to 
@@ -99,6 +102,7 @@ code: |
     for a_project in shuffled_projects:
       project_id = a_project['Project Identifier']
       if ( projects_dictionary[project_id]['seminar'] == a_student['seminar'] or projects_dictionary[project_id]['seminar'] == '' ) and ( len(projects_dictionary[project_id]['students']) < MJFconstants.max_group_size ):
+      # if len(projects_dictionary[project_id]['students']) < MJFconstants.max_group_size:
         # We have a project in the right seminar with vacancies so allocate
         # the student here
         projects_dictionary[project_id]['seminar'] = a_student['seminar']

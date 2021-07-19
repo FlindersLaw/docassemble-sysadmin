@@ -34,7 +34,7 @@ question: Update User Privileges
 subquestion: |
   This script reads all existing users and adds these additional privileges:
   
-  - `llaw3301_2020_s1` (which is hard-wired into the code); and
+  - `llaw3301_2021_s2` (which is hard-wired into the code); and
   - their seminar number.
   
   The seminar number is extracted from a CSV export from FLO.  The topic identifier

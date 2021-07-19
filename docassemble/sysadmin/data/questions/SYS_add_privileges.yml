@@ -26,7 +26,7 @@ include:
 # Docassemble
 mandatory: True
 code: |
-  MJFtopic_priv = 'llaw3301_2020_s1'
+  MJFtopic_priv = 'llaw3301_2021_s2'
 ---
 # Reads the input file and calls csv to create a list of lists.
 # I wanted to use the csv python module but I received pickle errors so 

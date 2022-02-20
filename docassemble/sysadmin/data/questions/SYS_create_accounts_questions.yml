@@ -84,8 +84,8 @@ content: |
   Wishing you all the best for this topic.  It's new, it's exciting and it's
   not as scary as you may think!
 
-  Mark Ferraretto  
-  [mark.ferraretto@flinders.edu.au](mailto:mark.ferraretto@flinders.edu.au)
+  James Scheibner  
+  [james.scheibner@flinders.edu.au](mailto:james.scheibner@flinders.edu.au)
 ---
 attachment:
   - docx template file: Access_to_Docassemble_and_GitHub.docx
@@ -103,5 +103,5 @@ fields:
       - "LLAW3301: Law in a Digital Age"
       - "Flinders Law Beyond: Coding the Law"
   - Intake period: MJFtopic_intake
-    hint: "eg: Semester 2 2020 / August 1 2020 Intake"
+    hint: "eg: Semester 2 2021 / August 1 2021 Intake"
 ---

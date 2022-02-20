@@ -18,7 +18,7 @@ code: |
   MJFconstants.teaching_period = '2022_S1'
   
   # Find the Topic Guide in FLO and paste URL in here
-  MJFconstants.topic_guide_URL = 'https://flo.flinders.edu.au/course/view.php?id=70284'
+  MJFconstants.topic_guide_URL = 'https://flo.flinders.edu.au/course/view.php?id=73213'
   
   # Date the survey must be completed by the students
   MJFconstants.due_date = datetime.datetime(2022, 3, 4, hour=16, minute=00, second=00)

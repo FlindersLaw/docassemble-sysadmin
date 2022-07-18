@@ -21,10 +21,10 @@ code: |
   MJFconstants.topic_guide_URL = 'https://flo.flinders.edu.au/course/view.php?id=75916'
   
   # Date the survey must be completed by the students
-  MJFconstants.due_date = datetime.datetime(2021, 7, 28, hour=16, minute=00, second=00)
+  MJFconstants.due_date = datetime.datetime(2021, 8, 5, hour=16, minute=00, second=00)
   
   # Max size for a student project group
-  MJFconstants.max_group_size = 5
+  MJFconstants.max_group_size = 6
   
   #
   # These should remain, well, constant!

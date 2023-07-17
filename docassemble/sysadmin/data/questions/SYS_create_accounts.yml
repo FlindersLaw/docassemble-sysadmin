@@ -64,7 +64,9 @@ subquestion: |
   read input from user data exported from FLO.  To export the data do the 
   following:
   
-  - instructions to go here
+  - Upload the file as a CSV
+  - Click continue once you can see that the accounts have been created correctly
+  - Enter which intake/topic the students are in
   
   You must have this data ready to upload before you run this application.  After
   you upload the file there will be no further interaction with this program.  

@@ -34,7 +34,7 @@ table: current_projects_table
 rows: current_projects_data
 columns:
   - Project ID: |
-      '[{}]({})'.format(row_item['Project Identifier'], row_item['Name'])
+      '[{}](https://flinders.sharepoint.com{})'.format(row_item['Project Identifier'], row_item['Name'])
   - Organisation: |
       row_item['Organisation']
   - Description: |

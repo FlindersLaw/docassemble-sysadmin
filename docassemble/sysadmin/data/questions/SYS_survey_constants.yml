@@ -24,7 +24,7 @@ code: |
   MJFconstants.due_date = datetime.datetime(2023, 8, 4, hour=12, minute=00, second=00)
   
   # Max size for a student project group
-  MJFconstants.max_group_size = 6
+  MJFconstants.max_group_size = 4
   
   #
   # These should remain, well, constant!
